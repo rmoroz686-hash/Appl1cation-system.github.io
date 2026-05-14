@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Система заявок PRO</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --border: #d1d5db;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --warning: #f59e0b;
+    }
+
+    body.dark {
+      --bg: #111827;
+      --card: #1f2937;
+      --text: #f9fafb;
+      --border: #374151;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: 0.3s;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: white;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      transition: 0.3s;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 14px;
+      background: var(--primary);
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.25s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.92;
+    }
+
+    .danger {
+      background: var(--danger);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filters input,
+    .filters select {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .ticket {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      transition: 0.25s;
+    }
+
+    .ticket:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .open { background: var(--success); }
+    .progress { background: var(--warning); }
+    .closed { background: var(--danger); }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 13px;
+      color: gray;
+    }
+
+    .role-badge {
+      background: #111827;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .theme-btn {
+      max-width: 220px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 14px;
+      text-align: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .stat h3 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Система заявок PRO</h1>
+  <p>Современная система управления заявками</p>
+</header>
+
+<div class="container">
+
+  <div class="topbar">
+    <button class="theme-btn" onclick="toggleTheme()">Сменить тему</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <h3 id="totalCount">0</h3>
+      <p>Всего заявок</p>
+    </div>
+
+    <div class="stat">
+      <h3 id="openCount">0</h3>
+      <p>Открытых</p>
+    </div>
+
+    <div class="stat">
+      <h3 id="closedCount">0</h3>
+      <p>Закрытых</p>
+    </div>
+  </div>
+
+  <div class="role-box card">
+    <h2>Пользователи и роли</h2>
+
+    <label>Логин</label>
+    <input type="text" id="login" placeholder="Введите логин">
+
+    <label>Пароль</label>
+    <input type="password" id="password" placeholder="Введите пароль">
+
+    <label>Создать роль</label>
+    <select id="roleSelect">
+      <option value="user">Пользователь</option>
+      <option value="manager">Менеджер</option>
+      <option value="admin">Администратор</option>
+    </select>
+
+    <button onclick="loginUser()">Войти</button>
+
+    <div class="role-badge" id="roleBadge">Гость</div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Создать заявку</h2>
+
+      <label>Название</label>
+      <input type="text" id="title" placeholder="Введите название" />
+
+      <label>Описание</label>
+      <textarea id="description" placeholder="Введите описание"></textarea>
+
+      <label>Приоритет</label>
+      <select id="priority">
+        <option>Низкий</option>
+        <option>Средний</option>
+        <option>Высокий</option>
+      </select>
+
+      <button onclick="createTicket()">Создать заявку</button>
+    </div>
+
+    <div class="card">
+      <h2>Список заявок</h2>
+
+      <div class="filters">
+        <input type="text" id="search" placeholder="Поиск..." oninput="renderTickets()" />
+
+        <select id="statusFilter" onchange="renderTickets()">
+          <option value="all">Все статусы</option>
+          <option value="Открыта">Открыта</option>
+          <option value="В работе">В работе</option>
+          <option value="Закрыта">Закрыта</option>
+        </select>
+
+        <select id="priorityFilter" onchange="renderTickets()">
+          <option value="all">Все приоритеты</option>
+          <option value="Низкий">Низкий</option>
+          <option value="Средний">Средний</option>
+          <option value="Высокий">Высокий</option>
+        </select>
+      </div>
+
+      <div id="tickets"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+
+  let currentUser = {
+    login: 'Гость',
+    role: 'user'
+  };
+
+  function saveTickets() {
+    localStorage.setItem('tickets', JSON.stringify(tickets));
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+  }
+
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+  }
+
+  function loginUser() {
+    const login = document.getElementById('login').value;
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('roleSelect').value;
+
+    if (!login || !password) {
+      alert('Введите логин и пароль');
+      return;
+    }
+
+    currentUser = { login, role };
+
+    const roles = {
+      user: 'Пользователь',
+      manager: 'Менеджер',
+      admin: 'Администратор'
+    };
+
+    document.getElementById('roleBadge').innerHTML = `Вы вошли как: ${login} (${roles[role]})`;
+
+    renderTickets();
+  }
+
+  function createTicket() {
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const priority = document.getElementById('priority').value;
+
+    if (!title || !description) {
+      alert('Заполните все поля');
+      return;
+    }
+
+    tickets.unshift({
+      id: Date.now(),
+      title,
+      description,
+      priority,
+      status: 'Открыта',
+      created: new Date().toLocaleString(),
+      author: currentUser.login
+    });
+
+    saveTickets();
+    renderTickets();
+
+    title.value = '';
+  }
+
+  function changeStatus(id) {
+    if (currentUser.role === 'user') {
+      alert('Недостаточно прав');
+      return;
+    }
+
+    const ticket = tickets.find(t => t.id === id);
+
+    const statuses = ['Открыта', 'В работе', 'Закрыта'];
+    let index = statuses.indexOf(ticket.status);
+    ticket.status = statuses[(index + 1) % statuses.length];
+
+    saveTickets();
+    renderTickets();
+  }
+
+  function deleteTicket(id) {
+    if (currentUser.role !== 'admin') {
+      alert('Удаление доступно только администратору');
+      return;
+    }
+
+    tickets = tickets.filter(t => t.id !== id);
+
+    saveTickets();
+    renderTickets();
+  }
+
+  function updateStats() {
+    document.getElementById('totalCount').textContent = tickets.length;
+    document.getElementById('openCount').textContent = tickets.filter(t => t.status === 'Открыта').length;
+    document.getElementById('closedCount').textContent = tickets.filter(t => t.status === 'Закрыта').length;
+  }
+
+  function renderTickets() {
+    const container = document.getElementById('tickets');
+    const search = document.getElementById('search').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const priorityFilter = document.getElementById('priorityFilter').value;
+
+    container.innerHTML = '';
+
+    const filtered = tickets.filter(ticket => {
+      const searchMatch = ticket.title.toLowerCase().includes(search) || ticket.description.toLowerCase().includes(search);
+      const statusMatch = statusFilter === 'all' || ticket.status === statusFilter;
+      const priorityMatch = priorityFilter === 'all' || ticket.priority === priorityFilter;
+
+      return searchMatch && statusMatch && priorityMatch;
+    });
+
+    if (!filtered.length) {
+      container.innerHTML = '<p>Нет заявок</p>';
+    }
+
+    filtered.forEach(ticket => {
+      let statusClass = 'open';
+
+      if (ticket.status === 'В работе') statusClass = 'progress';
+      if (ticket.status === 'Закрыта') statusClass = 'closed';
+
+      const div = document.createElement('div');
+      div.className = 'ticket';
+
+      div.innerHTML = `
+        <div class="ticket-header">
+          <h3>${ticket.title}</h3>
+          <span class="status ${statusClass}">${ticket.status}</span>
+        </div>
+
+        <p>${ticket.description}</p>
+
+        <div class="meta">
+          <p><b>Автор:</b> ${ticket.author}</p>
+          <p><b>Приоритет:</b> ${ticket.priority}</p>
+          <p><b>Дата:</b> ${ticket.created}</p>
+        </div>
+
+        ${currentUser.role !== 'user' ? `<button onclick="changeStatus(${ticket.id})">Изменить статус</button>` : ''}
+
+        ${currentUser.role === 'admin' ? `<button class="danger" onclick="deleteTicket(${ticket.id})">Удалить</button>` : ''}
+      `;
+
+      container.appendChild(div);
+    });
+
+    updateStats();
+  }
+
+  renderTickets();
+</script>
+
+</body>
+</html>
