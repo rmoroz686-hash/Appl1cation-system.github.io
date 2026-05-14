@@ -405,8 +405,8 @@
   }
 
   function createTicket() {
-    if (!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'admin')) {
-      alert('Только менеджер или администратор может создавать заявки');
+    if (!currentUser || currentUser.role !== 'user') {
+      alert('Только пользователь может создавать заявки');
       return;
     }
 
