@@ -534,7 +534,8 @@
     }
 
     panel.innerHTML = `
-      <h3 style="margin-bottom:15px;">Управление ролями</h3>
+      <h3 style="margin-bottom:15px;">Управление ролями и пользователями</h3>
+      <p style="margin-bottom:15px;color:gray;">Администратор может назначать менеджеров, удалять роли и удалять пользователей.</p>
       ${users.map(user => `
         <div style="padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;">
           <b>${user.login}</b> — ${user.role}
@@ -545,7 +546,7 @@
             </button>
 
             <button class="danger" onclick="removeRole('${user.login}')">
-              Удалить роль
+              Удалить роль менеджера
             </button>
 
             <button class="danger" onclick="deleteUser('${user.login}')">
@@ -608,7 +609,7 @@
 
         ${(currentUser.role === 'manager' || currentUser.role === 'admin') ? `<button onclick="changeStatus(${ticket.id})">Изменить статус</button>` : ''}
 
-        ${currentUser.role === 'admin' ? `<button class="danger" onclick="deleteTicket(${ticket.id})">Удалить</button>` : ''}
+        ${(currentUser.role === 'admin' || currentUser.role === 'manager') ? `<button class="danger" onclick="deleteTicket(${ticket.id})">Удалить</button>` : ''}
       `;
 
       container.appendChild(div);
