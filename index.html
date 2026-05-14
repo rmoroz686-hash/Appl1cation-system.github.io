@@ -285,12 +285,7 @@
       <label>Описание</label>
       <textarea id="description" placeholder="Введите описание"></textarea>
 
-      <label>Приоритет</label>
-      <select id="priority">
-        <option>Низкий</option>
-        <option>Средний</option>
-        <option>Высокий</option>
-      </select>
+      
 
       <button onclick="createTicket()">Создать заявку</button>
     </div>
@@ -416,7 +411,7 @@
     }
     const title = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
-    const priority = document.getElementById('priority').value;
+    
 
     if (!title || !description) {
       alert('Заполните все поля');
@@ -427,7 +422,7 @@
       id: Date.now(),
       title,
       description,
-      priority,
+      
       status: 'Открыта',
       created: new Date().toLocaleString(),
       author: currentUser.login
