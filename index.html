@@ -396,14 +396,12 @@
 
   function createTicket() {
     if (!currentUser) {
-      currentUser = {
-        login: 'Гость',
-        role: 'guest'
-      };
+      alert('Сначала войдите или зарегистрируйтесь');
+      return;
     }
 
-    if (currentUser.role !== 'user' && currentUser.role !== 'guest') {
-      alert('Только пользователь или гость может создавать заявки');
+    if (currentUser.role !== 'user') {
+      alert('Только пользователь может создавать заявки');
       return;
     }
 
