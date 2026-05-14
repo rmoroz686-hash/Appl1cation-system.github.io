@@ -265,16 +265,13 @@
     <label>Пароль</label>
     <input type="password" id="password" placeholder="Введите пароль">
 
-    <label>Создать роль</label>
-    <select id="roleSelect">
-      <option value="user">Пользователь</option>
-      <option value="manager">Менеджер</option>
-      <option value="admin">Администратор</option>
-    </select>
+    <button onclick="registerUser()">Регистрация</button>
 
     <button onclick="loginUser()">Войти</button>
 
     <div class="role-badge" id="roleBadge">Гость</div>
+
+    <div id="adminPanel" style="margin-top:20px;"></div>
   </div>
 
   <div class="grid">
@@ -328,10 +325,15 @@
 <script>
   let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
 
-  let currentUser = {
-    login: 'Гость',
-    role: 'user'
-  };
+  let users = JSON.parse(localStorage.getItem('users')) || [
+    {
+      login: 'admin',
+      password: 'admin123',
+      role: 'admin'
+    }
+  ];
+
+  let currentUser = null;
 
   function saveTickets() {
     localStorage.setItem('tickets', JSON.stringify(tickets));
@@ -346,30 +348,72 @@
     document.body.classList.add('dark');
   }
 
-  function loginUser() {
-    const login = document.getElementById('login').value;
-    const password = document.getElementById('password').value;
-    const role = document.getElementById('roleSelect').value;
+  function registerUser() {
+    const login = document.getElementById('login').value.trim();
+    const password = document.getElementById('password').value.trim();
 
     if (!login || !password) {
-      alert('Введите логин и пароль');
+      alert('Заполните все поля');
       return;
     }
 
-    currentUser = { login, role };
+    const exists = users.find(u => u.login === login);
 
-    const roles = {
-      user: 'Пользователь',
+    if (exists) {
+      alert('Пользователь уже существует');
+      return;
+    }
+
+    users.push({
+      login,
+      password,
+      role: 'user'
+    });
+
+    localStorage.setItem('users', JSON.stringify(users));
+
+    alert('Регистрация успешна');
+  }
+
+  function loginUser() {
+    const login = document.getElementById('login').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    const user = users.find(
+      u => u.login === login && u.password === password
+    );
+
+    if (!user) {
+      alert('Неверный логин или пароль');
+      return;
+    }
+
+    currentUser = user;
+
+    const roleNames = {
+      admin: 'Администратор',
       manager: 'Менеджер',
-      admin: 'Администратор'
+      user: 'Пользователь'
     };
 
-    document.getElementById('roleBadge').innerHTML = `Вы вошли как: ${login} (${roles[role]})`;
+    document.getElementById('roleBadge').innerHTML = `
+      Вы вошли как: <b>${user.login}</b> (${roleNames[user.role]})
+    `;
 
+    renderUsers();
     renderTickets();
   }
 
   function createTicket() {
+    if (!currentUser || currentUser.role !== 'user') {
+      alert('Только пользователь может создавать заявки');
+      return;
+    }
+
+    if (!currentUser) {
+      alert('Сначала войдите в систему');
+      return;
+    }
     const title = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
     const priority = document.getElementById('priority').value;
@@ -396,7 +440,7 @@
   }
 
   function changeStatus(id) {
-    if (currentUser.role === 'user') {
+    if (!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'admin')) {
       alert('Недостаточно прав');
       return;
     }
@@ -412,6 +456,7 @@
   }
 
   function deleteTicket(id) {
+    if (!currentUser) return;
     if (currentUser.role !== 'admin') {
       alert('Удаление доступно только администратору');
       return;
@@ -421,6 +466,67 @@
 
     saveTickets();
     renderTickets();
+  }
+
+  function assignManager(login) {
+    if (!currentUser || currentUser.role !== 'admin') {
+      alert('Только администратор может назначать менеджеров');
+      return;
+    }
+
+    users = users.map(user => {
+      if (user.login === login) {
+        user.role = 'manager';
+      }
+      return user;
+    });
+
+    localStorage.setItem('users', JSON.stringify(users));
+    renderUsers();
+  }
+
+  function removeRole(login) {
+    if (!currentUser || currentUser.role !== 'admin') {
+      return;
+    }
+
+    users = users.map(user => {
+      if (user.login === login) {
+        user.role = 'user';
+      }
+      return user;
+    });
+
+    localStorage.setItem('users', JSON.stringify(users));
+    renderUsers();
+  }
+
+  function renderUsers() {
+    const panel = document.getElementById('adminPanel');
+
+    if (!currentUser || currentUser.role !== 'admin') {
+      panel.innerHTML = '';
+      return;
+    }
+
+    panel.innerHTML = `
+      <h3 style="margin-bottom:15px;">Управление ролями</h3>
+      ${users.map(user => `
+        <div style="padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;">
+          <b>${user.login}</b> — ${user.role}
+
+          ${user.role !== 'admin' ? `
+            <button onclick="assignManager('${user.login}')">
+              Назначить менеджером
+            </button>
+
+            <button class="danger" onclick="removeRole('${user.login}')">
+              Удалить роль
+            </button>
+          ` : ''}
+        </div>
+      `).join('')}
+    `;
   }
 
   function updateStats() {
@@ -472,7 +578,7 @@
           <p><b>Дата:</b> ${ticket.created}</p>
         </div>
 
-        ${currentUser.role !== 'user' ? `<button onclick="changeStatus(${ticket.id})">Изменить статус</button>` : ''}
+        ${(currentUser.role === 'manager' || currentUser.role === 'admin') ? `<button onclick="changeStatus(${ticket.id})">Изменить статус</button>` : ''}
 
         ${currentUser.role === 'admin' ? `<button class="danger" onclick="deleteTicket(${ticket.id})">Удалить</button>` : ''}
       `;
