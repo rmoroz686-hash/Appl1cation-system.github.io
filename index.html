@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Система заявок PRO</title>
+  <title>Система заявок</title>
   <style>
     :root {
       --bg: #f4f6f9;
@@ -229,8 +229,8 @@
 <body>
 
 <header>
-  <h1>Система заявок PRO</h1>
-  <p>Современная система управления заявками</p>
+  <h1>Система заявок</h1>
+  <p>Система управления заявками</p>
 </header>
 
 <div class="container">
@@ -405,8 +405,8 @@
   }
 
   function createTicket() {
-    if (!currentUser || currentUser.role !== 'user') {
-      alert('Только пользователь может создавать заявки');
+    if (!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'admin')) {
+      alert('Только менеджер или администратор может создавать заявки');
       return;
     }
 
@@ -456,7 +456,10 @@
   }
 
   function deleteTicket(id) {
-    if (!currentUser) return;
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'manager')) {
+      alert('Недостаточно прав');
+      return;
+    }
     if (currentUser.role !== 'admin') {
       alert('Удаление доступно только администратору');
       return;
@@ -501,6 +504,27 @@
     renderUsers();
   }
 
+  function deleteUser(login) {
+    if (!currentUser || currentUser.role !== 'admin') {
+      return;
+    }
+
+    if (login === 'admin') {
+      alert('Нельзя удалить главного администратора');
+      return;
+    }
+
+    users = users.filter(user => user.login !== login);
+
+    tickets = tickets.filter(ticket => ticket.author !== login);
+
+    localStorage.setItem('users', JSON.stringify(users));
+    saveTickets();
+
+    renderUsers();
+    renderTickets();
+  }
+
   function renderUsers() {
     const panel = document.getElementById('adminPanel');
 
@@ -522,6 +546,10 @@
 
             <button class="danger" onclick="removeRole('${user.login}')">
               Удалить роль
+            </button>
+
+            <button class="danger" onclick="deleteUser('${user.login}')">
+              Удалить пользователя
             </button>
           ` : ''}
         </div>
