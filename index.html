@@ -287,7 +287,9 @@
 
       
 
-      <button onclick="createTicket()">Создать заявку</button>
+      <button id="createTicketBtn" onclick="createTicket()" disabled>
+        Войдите в аккаунт для создания заявки
+      </button>
     </div>
 
     <div class="card">
@@ -380,6 +382,9 @@
 
     currentUser = user;
 
+    document.getElementById('createTicketBtn').disabled = false;
+    document.getElementById('createTicketBtn').innerText = 'Создать заявку';
+
     const roleNames = {
       admin: 'Администратор',
       manager: 'Менеджер',
@@ -396,7 +401,7 @@
 
   function createTicket() {
     if (!currentUser) {
-      alert('Необходимо войти в систему');
+      alert('Сначала зарегистрируйтесь и войдите в систему');
       return;
     }
     if (!currentUser) {
@@ -405,7 +410,7 @@
     }
 
     if (currentUser.role !== 'user') {
-      alert('Только пользователь может создавать заявки');
+      alert('Только зарегистрированный пользователь может создавать заявки');
       return;
     }
 
