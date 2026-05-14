@@ -303,12 +303,7 @@
           <option value="Закрыта">Закрыта</option>
         </select>
 
-        <select id="priorityFilter" onchange="renderTickets()">
-          <option value="all">Все приоритеты</option>
-          <option value="Низкий">Низкий</option>
-          <option value="Средний">Средний</option>
-          <option value="Высокий">Высокий</option>
-        </select>
+        
       </div>
 
       <div id="tickets"></div>
@@ -400,8 +395,15 @@
   }
 
   function createTicket() {
-    if (!currentUser || currentUser.role !== 'user') {
-      alert('Только пользователь может создавать заявки');
+    if (!currentUser) {
+      currentUser = {
+        login: 'Гость',
+        role: 'guest'
+      };
+    }
+
+    if (currentUser.role !== 'user' && currentUser.role !== 'guest') {
+      alert('Только пользователь или гость может создавать заявки');
       return;
     }
 
@@ -563,14 +565,14 @@
     const container = document.getElementById('tickets');
     const search = document.getElementById('search').value.toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value;
-    const priorityFilter = document.getElementById('priorityFilter').value;
+    
 
     container.innerHTML = '';
 
     const filtered = tickets.filter(ticket => {
       const searchMatch = ticket.title.toLowerCase().includes(search) || ticket.description.toLowerCase().includes(search);
       const statusMatch = statusFilter === 'all' || ticket.status === statusFilter;
-      const priorityMatch = priorityFilter === 'all' || ticket.priority === priorityFilter;
+      const priorityMatch = true;
 
       return searchMatch && statusMatch && priorityMatch;
     });
@@ -598,7 +600,7 @@
 
         <div class="meta">
           <p><b>Автор:</b> ${ticket.author}</p>
-          <p><b>Приоритет:</b> ${ticket.priority}</p>
+          
           <p><b>Дата:</b> ${ticket.created}</p>
         </div>
 
